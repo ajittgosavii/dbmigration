@@ -2600,12 +2600,12 @@ def render_enterprise_dashboard_tab():
     with col1:
         fig = px.line(activity_data, x='Date', y='Migrations', title='Daily Migrations')
         fig.update_layout(height=300)
-        st.plotly_chart(fig, use_container_width=True)
+         st.plotly_chart(fig, use_container_width=True, key="daily_migrations")
     
     with col2:
         fig = px.bar(activity_data.tail(7), x='Date', y='Cost Savings', title='Weekly Cost Savings')
         fig.update_layout(height=300)
-        st.plotly_chart(fig, use_container_width=True)
+         st.plotly_chart(fig, use_container_width=True, key="weekly_cost_savings")
     
     # Project status overview
     st.markdown("**📋 Project Status Overview:**")
@@ -2620,7 +2620,7 @@ def render_enterprise_dashboard_tab():
                  color_discrete_sequence=project_status['Color'],
                  title='Migration Projects by Status')
     fig.update_layout(height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="migration_projects_by_status")
 
 def render_examples_tab():
     """Render examples tab with enhanced tutorials"""
@@ -2938,7 +2938,7 @@ def render_compatibility_analysis_tab(config: Dict, schema_ddl: str, queries_tex
                         title='Performance Impact Prediction',
                         barmode='group')
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key="performance_impact_prediction")
 
 def render_enhanced_cost_analysis_tab(config: Dict):
     """Render enhanced cost analysis with optimization recommendations"""
@@ -3078,13 +3078,13 @@ def render_enhanced_cost_analysis_tab(config: Dict):
                 fig = px.pie(cost_breakdown_data, values='Monthly Cost', names='Component', 
                            title='Monthly Cost Distribution')
                 fig.update_layout(height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="monthly_cost_distribution")
             
             with col2:
                 fig = px.bar(cost_breakdown_data, x='Component', y=['Monthly Cost', 'One-time Cost'],
                            title='Cost Breakdown by Component')
                 fig.update_layout(height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="cost_breakdown_component")
             
             # Cost optimization recommendations
             st.markdown("**🎯 Cost Optimization Recommendations:**")
@@ -3305,7 +3305,7 @@ def render_enhanced_security_tab(config: Dict, schema_ddl: str):
                            color='Status', color_discrete_map={'Compliant': '#22c55e', 'Non-Compliant': '#ef4444'},
                            title='Compliance Framework Status')
                 fig.update_layout(height=300)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="compiance_framework_status")
             
             # Data classification results
             st.markdown("**📊 Data Classification Results:**")
@@ -3328,7 +3328,7 @@ def render_enhanced_security_tab(config: Dict, schema_ddl: str):
                                'sensitive': '#ef4444'
                            })
                 fig.update_layout(height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="data_classification_distribution")
             
             # Security recommendations
             st.markdown("**💡 Security Recommendations:**")
