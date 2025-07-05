@@ -18,7 +18,6 @@ import sqlite3
 from pathlib import Path
 import difflib
 import ast
-# Removed sqlparse import as it's not used and not installed
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -2374,12 +2373,12 @@ def render_enhanced_sidebar():
         
         if projects:
             project_options = {p['name']: p['id'] for p in projects}
-            selected_project = st.selectbox("Select Project", options=list(project_options.keys()))
+            selected_project = st.selectbox("Select Project", options=list(project_options.keys()), key="sidebar_project_select")
             if selected_project:
                 st.session_state.current_project = project_options[selected_project]
         
         # Create new project
-        if st.button("➕ Create New Project"):
+        if st.button("➕ Create New Project", key="sidebar_create_project"):
             st.session_state.show_project_creator = True
     
     # Enhanced Database Configuration
@@ -2392,11 +2391,12 @@ def render_enhanced_sidebar():
         "Source Database Engine",
         ["mysql", "postgresql", "oracle", "sql_server", "mongodb"],
         index=["mysql", "postgresql", "oracle", "sql_server", "mongodb"].index(example_source) if example_source in ["mysql", "postgresql", "oracle", "sql_server", "mongodb"] else 0,
-        format_func=lambda x: f"{DATABASE_CONFIG[x]['icon']} {DATABASE_CONFIG[x]['display_name']}"
+        format_func=lambda x: f"{DATABASE_CONFIG[x]['icon']} {DATABASE_CONFIG[x]['display_name']}",
+        key="sidebar_source_engine"
     )
     
     source_info = DATABASE_CONFIG[source_engine]
-    source_version = st.sidebar.text_input("Source Version", "Latest")
+    source_version = st.sidebar.text_input("Source Version", "Latest", key="sidebar_source_version")
     
     # Enhanced source info display
     st.sidebar.markdown(f"""
@@ -2436,7 +2436,8 @@ def render_enhanced_sidebar():
             'rds_oracle': '🗄️ RDS Oracle',
             'rds_sqlserver': '🗄️ RDS SQL Server',
             'documentdb': '🍃 DocumentDB'
-        }.get(x, x.title())
+        }.get(x, x.title()),
+        key="sidebar_target_engine"
     )
     
     # Enhanced AWS Configuration
@@ -2444,76 +2445,79 @@ def render_enhanced_sidebar():
         instance_class = st.selectbox(
             "Instance Class",
             ["db.t3.micro", "db.t3.small", "db.t3.medium", "db.t3.large", 
-             "db.m5.large", "db.m5.xlarge", "db.r5.large", "db.r5.xlarge"]
+             "db.m5.large", "db.m5.xlarge", "db.r5.large", "db.r5.xlarge"],
+            key="sidebar_instance_class"
         )
         
-        storage_gb = st.number_input("Storage (GB)", min_value=20, max_value=10000, value=100)
-        storage_type = st.selectbox("Storage Type", ["gp2", "gp3", "io1", "io2"], index=1)
-        multi_az = st.checkbox("Multi-AZ Deployment", value=True)
-        backup_retention = st.slider("Backup Retention (days)", 1, 35, 7)
+        storage_gb = st.number_input("Storage (GB)", min_value=20, max_value=10000, value=100, key="sidebar_storage_gb")
+        storage_type = st.selectbox("Storage Type", ["gp2", "gp3", "io1", "io2"], index=1, key="sidebar_storage_type")
+        multi_az = st.checkbox("Multi-AZ Deployment", value=True, key="sidebar_multi_az")
+        backup_retention = st.slider("Backup Retention (days)", 1, 35, 7, key="sidebar_backup_retention")
     
     # Enhanced Security Configuration
     with st.sidebar.expander("🔒 Security Configuration", expanded=False):
-        encryption_at_rest = st.checkbox("Encryption at Rest", value=True)
-        encryption_in_transit = st.checkbox("Encryption in Transit", value=True)
-        iam_auth = st.checkbox("IAM Database Authentication", value=False)
+        encryption_at_rest = st.checkbox("Encryption at Rest", value=True, key="sidebar_encryption_rest")
+        encryption_in_transit = st.checkbox("Encryption in Transit", value=True, key="sidebar_encryption_transit")
+        iam_auth = st.checkbox("IAM Database Authentication", value=False, key="sidebar_iam_auth")
         
         compliance_requirements = st.multiselect(
             "Compliance Requirements",
             ["GDPR", "HIPAA", "SOC2", "PCI_DSS"],
-            default=["GDPR"]
+            default=["GDPR"],
+            key="sidebar_compliance"
         )
     
     # Enhanced Migration Scope
     st.sidebar.subheader("🎯 Migration Scope")
     
     with st.sidebar.expander("📋 Migration Options", expanded=True):
-        include_schema = st.checkbox("Include Schema Objects", True)
-        include_data = st.checkbox("Include Data Migration", True)
-        include_procedures = st.checkbox("Include Stored Procedures", True)
-        include_triggers = st.checkbox("Include Triggers", False)
+        include_schema = st.checkbox("Include Schema Objects", True, key="sidebar_include_schema")
+        include_data = st.checkbox("Include Data Migration", True, key="sidebar_include_data")
+        include_procedures = st.checkbox("Include Stored Procedures", True, key="sidebar_include_procedures")
+        include_triggers = st.checkbox("Include Triggers", False, key="sidebar_include_triggers")
         
         # Business context
-        business_critical = st.checkbox("Business Critical System", False)
+        business_critical = st.checkbox("Business Critical System", False, key="sidebar_business_critical")
         downtime_tolerance = st.selectbox(
             "Downtime Tolerance",
-            ["< 1 hour", "< 4 hours", "< 24 hours", "Flexible"]
+            ["< 1 hour", "< 4 hours", "< 24 hours", "Flexible"],
+            key="sidebar_downtime_tolerance"
         )
     
     # Enhanced Analysis Options
     st.sidebar.subheader("🔍 Analysis Options")
     
     with st.sidebar.expander("🤖 AI Analysis", expanded=True):
-        enable_ai_analysis = st.checkbox("Enable AI Analysis", True)
-        analysis_depth = st.selectbox("Analysis Depth", ["Standard", "Comprehensive", "Expert"])
+        enable_ai_analysis = st.checkbox("Enable AI Analysis", True, key="sidebar_enable_ai")
+        analysis_depth = st.selectbox("Analysis Depth", ["Standard", "Comprehensive", "Expert"], key="sidebar_analysis_depth")
         
         if enable_ai_analysis:
             st.markdown('<span class="feature-badge badge-ai">🤖 AI Enhanced</span>', unsafe_allow_html=True)
     
     with st.sidebar.expander("💰 Cost Analysis", expanded=True):
-        enable_cost_analysis = st.checkbox("Real-time Cost Analysis", True)
-        enable_optimization = st.checkbox("Cost Optimization", True)
+        enable_cost_analysis = st.checkbox("Real-time Cost Analysis", True, key="sidebar_enable_cost")
+        enable_optimization = st.checkbox("Cost Optimization", True, key="sidebar_enable_optimization")
         
         if enable_cost_analysis:
             st.markdown('<span class="feature-badge badge-new">💰 Live Pricing</span>', unsafe_allow_html=True)
     
     with st.sidebar.expander("🔒 Security Analysis", expanded=True):
-        enable_security_scan = st.checkbox("Security Assessment", True)
-        enable_compliance_check = st.checkbox("Compliance Validation", True)
+        enable_security_scan = st.checkbox("Security Assessment", True, key="sidebar_enable_security")
+        enable_compliance_check = st.checkbox("Compliance Validation", True, key="sidebar_enable_compliance")
         
         if enable_security_scan:
             st.markdown('<span class="feature-badge badge-enterprise">🔒 Enterprise</span>', unsafe_allow_html=True)
     
     # Advanced Options
     with st.sidebar.expander("⚙️ Advanced Options", expanded=False):
-        generate_scripts = st.checkbox("Generate Migration Scripts", True)
-        enable_monitoring = st.checkbox("Setup Monitoring", True)
-        enable_collaboration = st.checkbox("Team Collaboration", False)
+        generate_scripts = st.checkbox("Generate Migration Scripts", True, key="sidebar_generate_scripts")
+        enable_monitoring = st.checkbox("Setup Monitoring", True, key="sidebar_enable_monitoring")
+        enable_collaboration = st.checkbox("Team Collaboration", False, key="sidebar_enable_collaboration")
         
         # Team settings
         if enable_collaboration:
             st.session_state.collaboration_enabled = True
-            team_size = st.number_input("Team Size", min_value=1, max_value=20, value=3)
+            team_size = st.number_input("Team Size", min_value=1, max_value=20, value=3, key="sidebar_team_size")
             st.markdown('<span class="feature-badge badge-enterprise">👥 Collaboration</span>', unsafe_allow_html=True)
     
     return {
@@ -2642,7 +2646,7 @@ def render_examples_tab():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🐬 MySQL → Aurora PostgreSQL"):
+        if st.button("🐬 MySQL → Aurora PostgreSQL", key="example_mysql_aurora"):
             st.session_state.example_source = 'mysql'
             st.session_state.example_target = 'aurora_postgresql'
             st.session_state.example_schema = DATABASE_CONFIG['mysql']['sample_schema']
@@ -2650,7 +2654,7 @@ def render_examples_tab():
             st.rerun()
     
     with col2:
-        if st.button("🐘 PostgreSQL → Aurora PostgreSQL"):
+        if st.button("🐘 PostgreSQL → Aurora PostgreSQL", key="example_postgres_aurora"):
             st.session_state.example_source = 'postgresql'
             st.session_state.example_target = 'aurora_postgresql'
             st.session_state.example_schema = DATABASE_CONFIG['postgresql']['sample_schema']
@@ -2658,7 +2662,7 @@ def render_examples_tab():
             st.rerun()
     
     with col3:
-        if st.button("🔴 Oracle → RDS PostgreSQL"):
+        if st.button("🔴 Oracle → RDS PostgreSQL", key="example_oracle_rds"):
             st.session_state.example_source = 'oracle'
             st.session_state.example_target = 'rds_postgresql'
             st.session_state.example_schema = DATABASE_CONFIG['oracle']['sample_schema']
@@ -2739,7 +2743,8 @@ def render_schema_input_tab(config: Dict):
         input_method = st.radio(
             "Choose input method:",
             ["Manual Entry", "File Upload"],
-            help=f"Select how you want to provide {source_info['schema_term'].lower()} information"
+            help=f"Select how you want to provide {source_info['schema_term'].lower()} information",
+            key="schema_input_method"
         )
         
         if input_method == "Manual Entry":
@@ -2748,21 +2753,24 @@ def render_schema_input_tab(config: Dict):
                 f"{source_info['schema_label']}",
                 value=default_schema,
                 height=300,
-                help=f"Enter your {source_info['schema_term'].lower()} definition here"
+                help=f"Enter your {source_info['schema_term'].lower()} definition here",
+                key="schema_ddl_input"
             )
             
         elif input_method == "File Upload":
             uploaded_file = st.file_uploader(
                 f"Upload {source_info['display_name']} Schema File",
                 type=[ext.replace('.', '') for ext in source_info['file_extensions']],
-                help=f"Upload a file containing your {source_info['schema_term'].lower()}"
+                help=f"Upload a file containing your {source_info['schema_term'].lower()}",
+                key="schema_file_upload"
             )
             
             if uploaded_file:
                 schema_ddl = uploaded_file.read().decode('utf-8')
                 st.text_area(f"Uploaded {source_info['schema_term']} Preview", 
                            schema_ddl[:1000] + "..." if len(schema_ddl) > 1000 else schema_ddl, 
-                           height=200)
+                           height=200,
+                           key="schema_preview")
             else:
                 schema_ddl = example_schema if example_schema else ""
     
@@ -2773,7 +2781,8 @@ def render_schema_input_tab(config: Dict):
             f"{source_info['query_label']} to Analyze",
             placeholder=source_info.get('sample_queries', 'Enter your queries here...'),
             height=300,
-            help=f"Enter {source_info['query_term'].lower()} that you want to analyze for compatibility"
+            help=f"Enter {source_info['query_term'].lower()} that you want to analyze for compatibility",
+            key="queries_input"
         )
         
         # Enhanced query analysis info
@@ -2791,7 +2800,7 @@ def render_schema_input_tab(config: Dict):
         """, unsafe_allow_html=True)
     
     # Clear example data button
-    if example_schema and st.button("🗑️ Clear Example Data"):
+    if example_schema and st.button("🗑️ Clear Example Data", key="clear_example_data"):
         st.session_state.pop('example_schema', None)
         st.session_state.pop('example_source', None)
         st.session_state.pop('example_target', None)
@@ -2824,7 +2833,7 @@ def render_compatibility_analysis_tab(config: Dict, schema_ddl: str, queries_tex
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("🚀 Run Enhanced Compatibility Analysis", type="primary"):
+    if st.button("🚀 Run Enhanced Compatibility Analysis", type="primary", key="run_compatibility_analysis"):
         with st.spinner("🔄 Running comprehensive compatibility analysis..."):
             
             # Simulate enhanced analysis (in production, use actual SchemaAnalyzer)
@@ -2959,7 +2968,7 @@ def render_enhanced_cost_analysis_tab(config: Dict):
         st.info(f"Multi-AZ: {config['multi_az']}")
         
         # Additional options
-        reserved_instance = st.checkbox("Reserved Instance (1 year)", False)
+        reserved_instance = st.checkbox("Reserved Instance (1 year)", False, key="cost_reserved_instance")
         if reserved_instance:
             st.markdown('<span class="feature-badge badge-enterprise">💾 40% Savings</span>', unsafe_allow_html=True)
     
@@ -2973,10 +2982,10 @@ def render_enhanced_cost_analysis_tab(config: Dict):
     
     with col3:
         st.markdown("**🚚 Migration Configuration:**")
-        migration_duration = st.number_input("Migration Duration (hours)", min_value=1, max_value=168, value=24)
-        dms_instance = st.selectbox("DMS Instance", ["dms.t3.medium", "dms.t3.large", "dms.c5.xlarge"])
+        migration_duration = st.number_input("Migration Duration (hours)", min_value=1, max_value=168, value=24, key="cost_migration_duration")
+        dms_instance = st.selectbox("DMS Instance", ["dms.t3.medium", "dms.t3.large", "dms.c5.xlarge"], key="cost_dms_instance")
         
-        data_size_estimate = st.number_input("Data Size (GB)", min_value=1, max_value=100000, value=config['storage_gb'])
+        data_size_estimate = st.number_input("Data Size (GB)", min_value=1, max_value=100000, value=config['storage_gb'], key="cost_data_size")
     
     # Advanced cost factors
     with st.expander("🔧 Advanced Cost Factors", expanded=False):
@@ -2984,15 +2993,15 @@ def render_enhanced_cost_analysis_tab(config: Dict):
         
         with col1:
             st.markdown("**📊 Usage Patterns:**")
-            cpu_utilization = st.slider("Expected CPU Utilization (%)", 0, 100, 70)
-            connection_count = st.number_input("Concurrent Connections", min_value=1, max_value=10000, value=100)
+            cpu_utilization = st.slider("Expected CPU Utilization (%)", 0, 100, 70, key="cost_cpu_utilization")
+            connection_count = st.number_input("Concurrent Connections", min_value=1, max_value=10000, value=100, key="cost_connection_count")
         
         with col2:
             st.markdown("**🌍 Geographic Distribution:**")
-            primary_region = st.selectbox("Primary Region", ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"])
-            cross_region_backup = st.checkbox("Cross-Region Backup", True)
+            primary_region = st.selectbox("Primary Region", ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"], key="cost_primary_region")
+            cross_region_backup = st.checkbox("Cross-Region Backup", True, key="cost_cross_region_backup")
     
-    if st.button("💰 Calculate Comprehensive Cost Analysis", type="primary"):
+    if st.button("💰 Calculate Comprehensive Cost Analysis", type="primary", key="calculate_cost_analysis"):
         with st.spinner("🔄 Analyzing costs with real-time AWS pricing..."):
             
             # Enhanced config for cost calculation
@@ -3198,7 +3207,7 @@ def render_enhanced_security_tab(config: Dict, schema_ddl: str):
         else:
             st.warning("⚠️ No Compliance Requirements")
     
-    if st.button("🔍 Run Comprehensive Security Analysis", type="primary"):
+    if st.button("🔍 Run Comprehensive Security Analysis", type="primary", key="run_security_analysis"):
         with st.spinner("🔒 Analyzing security posture and compliance..."):
             
             # Create migration context for security analysis
@@ -3266,7 +3275,7 @@ def render_enhanced_security_tab(config: Dict, schema_ddl: str):
             if security_assessment.vulnerabilities:
                 st.markdown("**🚨 Security Vulnerabilities:**")
                 
-                for vuln in security_assessment.vulnerabilities:
+                for i, vuln in enumerate(security_assessment.vulnerabilities):
                     severity_color = {'high': 'error', 'medium': 'warning', 'low': 'info'}
                     
                     with st.expander(f"{vuln['severity'].upper()}: {vuln['description']}", expanded=vuln['severity'] == 'high'):
@@ -3437,23 +3446,23 @@ def render_migration_scripts_tab(config: Dict, schema_ddl: str):
     
     with col1:
         st.markdown("**📋 Pre-Migration Scripts:**")
-        generate_pre = st.checkbox("Pre-Migration Validation", True)
-        include_backup = st.checkbox("Backup Scripts", True)
-        include_validation = st.checkbox("Data Validation", True)
+        generate_pre = st.checkbox("Pre-Migration Validation", True, key="scripts_generate_pre")
+        include_backup = st.checkbox("Backup Scripts", True, key="scripts_include_backup")
+        include_validation = st.checkbox("Data Validation", True, key="scripts_include_validation")
     
     with col2:
         st.markdown("**🔄 Conversion Scripts:**")
-        generate_conversion = st.checkbox("Schema Conversion", True)
-        include_indexes = st.checkbox("Index Creation", True)
-        include_constraints = st.checkbox("Constraint Migration", True)
+        generate_conversion = st.checkbox("Schema Conversion", True, key="scripts_generate_conversion")
+        include_indexes = st.checkbox("Index Creation", True, key="scripts_include_indexes")
+        include_constraints = st.checkbox("Constraint Migration", True, key="scripts_include_constraints")
     
     with col3:
         st.markdown("**✅ Post-Migration Scripts:**")
-        generate_post = st.checkbox("Post-Migration Validation", True)
-        include_optimization = st.checkbox("Performance Optimization", True)
-        include_monitoring = st.checkbox("Monitoring Setup", True)
+        generate_post = st.checkbox("Post-Migration Validation", True, key="scripts_generate_post")
+        include_optimization = st.checkbox("Performance Optimization", True, key="scripts_include_optimization")
+        include_monitoring = st.checkbox("Monitoring Setup", True, key="scripts_include_monitoring")
     
-    if st.button("🚀 Generate Enterprise Migration Scripts", type="primary"):
+    if st.button("🚀 Generate Enterprise Migration Scripts", type="primary", key="generate_migration_scripts"):
         with st.spinner("📝 Generating comprehensive migration scripts..."):
             time.sleep(2)  # Simulate script generation
             
@@ -3486,7 +3495,8 @@ SELECT 'Pre-migration validation completed' as status, NOW() as timestamp;"""
                         "📥 Download Pre-Migration Script",
                         pre_script,
                         f"pre_migration_{config['source_engine']}_to_{config['target_engine']}.sql",
-                        "text/sql"
+                        "text/sql",
+                        key="download_pre_script"
                     )
             
             # Schema conversion script
@@ -3515,7 +3525,8 @@ SELECT 'Schema conversion completed' as status, NOW() as timestamp;"""
                         "📥 Download Conversion Script",
                         conversion_script,
                         f"schema_conversion_{config['source_engine']}_to_{config['target_engine']}.sql",
-                        "text/sql"
+                        "text/sql",
+                        key="download_conversion_script"
                     )
             
             # Post-migration script
@@ -3549,7 +3560,8 @@ SELECT 'Migration ready for production use' as final_status;"""
                         "📥 Download Post-Migration Script",
                         post_script,
                         f"post_migration_{config['source_engine']}_to_{config['target_engine']}.sql",
-                        "text/sql"
+                        "text/sql",
+                        key="download_post_script"
                     )
             
             # Enhanced migration checklist
@@ -3609,7 +3621,8 @@ SELECT 'Migration ready for production use' as final_status;"""
                 "📥 Download Migration Checklist",
                 checklist,
                 f"migration_checklist_{config['source_engine']}_to_{config['target_engine']}.md",
-                "text/markdown"
+                "text/markdown",
+                key="download_checklist"
             )
 
 def render_enhanced_ai_analysis_tab(config: Dict, migration_context: Dict):
@@ -3643,18 +3656,19 @@ def render_enhanced_ai_analysis_tab(config: Dict, migration_context: Dict):
                 "Timeline Estimation",
                 "Security Analysis"
             ],
-            default=["Migration Strategy", "Risk Assessment", "Timeline Estimation"]
+            default=["Migration Strategy", "Risk Assessment", "Timeline Estimation"],
+            key="ai_analysis_types"
         )
     
     with col2:
-        analysis_depth = st.selectbox("Analysis Depth", ["Standard", "Comprehensive", "Expert"])
-        include_industry_context = st.checkbox("Include Industry Best Practices", True)
+        analysis_depth = st.selectbox("Analysis Depth", ["Standard", "Comprehensive", "Expert"], key="ai_analysis_depth")
+        include_industry_context = st.checkbox("Include Industry Best Practices", True, key="ai_include_industry")
     
     with col3:
-        team_experience = st.selectbox("Team Experience Level", ["Beginner", "Intermediate", "Expert"])
-        budget_constraints = st.selectbox("Budget Flexibility", ["Tight", "Moderate", "Flexible"])
+        team_experience = st.selectbox("Team Experience Level", ["Beginner", "Intermediate", "Expert"], key="ai_team_experience")
+        budget_constraints = st.selectbox("Budget Flexibility", ["Tight", "Moderate", "Flexible"], key="ai_budget_constraints")
     
-    if st.button("🧠 Run Enhanced AI Analysis", type="primary"):
+    if st.button("🧠 Run Enhanced AI Analysis", type="primary", key="run_ai_analysis"):
         with st.spinner("🤖 Running comprehensive AI analysis..."):
             
             try:
@@ -3864,28 +3878,28 @@ def render_enhanced_autofix_tab(config: Dict, schema_ddl: str, queries_text: str
     with col1:
         st.markdown("**🔧 Fix Categories:**")
         fix_categories = []
-        if st.checkbox("Syntax & Compatibility", True):
+        if st.checkbox("Syntax & Compatibility", True, key="autofix_syntax_compat"):
             fix_categories.extend([FixCategory.SYNTAX, FixCategory.COMPATIBILITY])
-        if st.checkbox("Performance Optimization", True):
+        if st.checkbox("Performance Optimization", True, key="autofix_performance"):
             fix_categories.append(FixCategory.PERFORMANCE)
-        if st.checkbox("Security Enhancements", True):
+        if st.checkbox("Security Enhancements", True, key="autofix_security"):
             fix_categories.append(FixCategory.SECURITY)
-        if st.checkbox("Compliance & Governance", False):
+        if st.checkbox("Compliance & Governance", False, key="autofix_compliance"):
             fix_categories.append(FixCategory.COMPLIANCE)
     
     with col2:
         st.markdown("**⚙️ Auto-Apply Settings:**")
-        auto_apply_safe = st.checkbox("Auto-apply safe fixes", False)
-        min_confidence = st.slider("Minimum confidence for auto-apply", 0.5, 1.0, 0.9, 0.05)
-        show_cosmetic_fixes = st.checkbox("Show cosmetic fixes", False)
+        auto_apply_safe = st.checkbox("Auto-apply safe fixes", False, key="autofix_auto_apply")
+        min_confidence = st.slider("Minimum confidence for auto-apply", 0.5, 1.0, 0.9, 0.05, key="autofix_min_confidence")
+        show_cosmetic_fixes = st.checkbox("Show cosmetic fixes", False, key="autofix_show_cosmetic")
     
     with col3:
         st.markdown("**🎨 Display Options:**")
-        show_diff_view = st.checkbox("Show diff view", True)
-        group_by_severity = st.checkbox("Group by severity", True)
-        show_ai_explanations = st.checkbox("Show AI explanations", True)
+        show_diff_view = st.checkbox("Show diff view", True, key="autofix_show_diff")
+        group_by_severity = st.checkbox("Group by severity", True, key="autofix_group_severity")
+        show_ai_explanations = st.checkbox("Show AI explanations", True, key="autofix_show_ai")
     
-    if st.button("🚀 Run Auto-Fix Analysis", type="primary"):
+    if st.button("🚀 Run Auto-Fix Analysis", type="primary", key="run_autofix_analysis"):
         with st.spinner("🔍 Analyzing code and generating fixes..."):
             
             # Initialize auto-fix engine
@@ -4021,7 +4035,8 @@ def render_enhanced_autofix_tab(config: Dict, schema_ddl: str, queries_text: str
                             "📥 Download Fixed Schema",
                             fixed_result['fixed_schema'],
                             f"fixed_schema_{config['source_engine']}_to_{config['target_engine']}.sql",
-                            "text/sql"
+                            "text/sql",
+                            key="download_fixed_schema"
                         )
                 
                 with col2:
@@ -4030,7 +4045,8 @@ def render_enhanced_autofix_tab(config: Dict, schema_ddl: str, queries_text: str
                             "📥 Download Fixed Queries", 
                             fixed_result['fixed_queries'],
                             f"fixed_queries_{config['source_engine']}_to_{config['target_engine']}.sql",
-                            "text/sql"
+                            "text/sql",
+                            key="download_fixed_queries"
                         )
 
 def render_fix_item(fix: AutoFix, index: int, show_diff_view: bool, show_ai_explanations: bool, 
@@ -4111,25 +4127,25 @@ def render_fix_item(fix: AutoFix, index: int, show_diff_view: bool, show_ai_expl
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            if st.button(f"✅ Apply Fix", key=f"apply_{fix.id}"):
+            if st.button(f"✅ Apply Fix", key=f"apply_{fix.id}_{index}"):
                 fix.status = FixStatus.APPLIED
                 st.success("Fix applied!")
                 st.rerun()
         
         with col2:
-            if st.button(f"⏭️ Skip Fix", key=f"skip_{fix.id}"):
+            if st.button(f"⏭️ Skip Fix", key=f"skip_{fix.id}_{index}"):
                 fix.status = FixStatus.SKIPPED
                 st.info("Fix skipped")
                 st.rerun()
         
         with col3:
-            if st.button(f"👁️ Mark Reviewed", key=f"review_{fix.id}"):
+            if st.button(f"👁️ Mark Reviewed", key=f"review_{fix.id}_{index}"):
                 fix.status = FixStatus.REVIEWED
                 st.info("Fix marked as reviewed")
                 st.rerun()
         
         with col4:
-            if st.button(f"📋 Copy Fixed Code", key=f"copy_{fix.id}"):
+            if st.button(f"📋 Copy Fixed Code", key=f"copy_{fix.id}_{index}"):
                 st.code(fix.fixed_code, language='sql')
 
 def main():
@@ -4147,8 +4163,8 @@ def main():
     if st.session_state.get('show_project_creator', False):
         with st.sidebar.form("create_project"):
             st.markdown("**Create New Project:**")
-            project_name = st.text_input("Project Name")
-            project_description = st.text_area("Description")
+            project_name = st.text_input("Project Name", key="project_name_input")
+            project_description = st.text_area("Description", key="project_description_input")
             
             if st.form_submit_button("Create Project"):
                 db_manager = EnterpriseDBManager()
