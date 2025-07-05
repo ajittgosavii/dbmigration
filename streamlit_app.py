@@ -3305,7 +3305,7 @@ def render_enhanced_security_tab(config: Dict, schema_ddl: str):
                            color='Status', color_discrete_map={'Compliant': '#22c55e', 'Non-Compliant': '#ef4444'},
                            title='Compliance Framework Status')
                 fig.update_layout(height=300)
-                st.plotly_chart(fig, use_container_width=True, key="compiance_framework_status")
+                st.plotly_chart(fig, use_container_width=True, key="compliance_framework_status")
             
             # Data classification results
             st.markdown("**📊 Data Classification Results:**")
