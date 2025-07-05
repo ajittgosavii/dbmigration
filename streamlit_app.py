@@ -2600,12 +2600,12 @@ def render_enterprise_dashboard_tab():
     with col1:
         fig = px.line(activity_data, x='Date', y='Migrations', title='Daily Migrations')
         fig.update_layout(height=300)
-         st.plotly_chart(fig, use_container_width=True, key="daily_migrations")
+        st.plotly_chart(fig, use_container_width=True, key="daily_migrations")
     
     with col2:
         fig = px.bar(activity_data.tail(7), x='Date', y='Cost Savings', title='Weekly Cost Savings')
         fig.update_layout(height=300)
-         st.plotly_chart(fig, use_container_width=True, key="weekly_cost_savings")
+        st.plotly_chart(fig, use_container_width=True, key="weekly_cost_savings")
     
     # Project status overview
     st.markdown("**📋 Project Status Overview:**")
