@@ -18,7 +18,7 @@ import sqlite3
 from pathlib import Path
 import difflib
 import ast
-import sqlparse
+# Removed sqlparse import as it's not used and not installed
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -525,7 +525,7 @@ CREATE TABLE users (
     last_login_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+    CONSTRAINT check_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')
 );''',
         'sample_queries': '''-- PostgreSQL Query Examples with Advanced Features
 
